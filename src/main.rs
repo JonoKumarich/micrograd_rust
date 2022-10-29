@@ -1,69 +1,40 @@
-use std::cell::RefCell;
-use std::ops::{Add, Mul};
-use std::rc::Rc;
+mod engine;
+use engine::Value;
 
 fn main() {
-    let a = Value::new(3.0);
-    let b = Value::new(2.0);
+    let x1 = Value::new(2.0);
+    let x2 = Value::new(0.0);
 
-    // let c = a + b;
-    println!("{:?}", a)
-}
+    let w1 = Value::new(-3.0);
+    let w2 = Value::new(1.0);
 
-#[derive(Debug, Clone)]
-struct Value(Rc<RefCell<ValueData>>);
+    let b = Value::new(6.8813735870195432);
 
-#[derive(Debug)]
-struct ValueData {
-    data: f32,
-    grad: f32,
-    children: Vec<Value>,
-    op: Option<Operation>,
-}
+    let x1w1 = x1 * w1;
+    let x2w2 = x2 * w2;
+    let x1w1x2w2 = x1w1 + x2w2;
+    let n = x1w1x2w2 + b;
+    let mut o = n.tanh();
 
-#[derive(Debug)]
-enum Operation {
-    Add,
-    Mul,
-}
+    o.backprop();
 
-impl Value {
-    fn new(value: f32) -> Self {
-        Self(Rc::new(RefCell::new(ValueData {
-            data: value,
-            grad: 0.0,
-            children: Vec::new(),
-            op: None,
-        })))
-    }
+    let n = &o.get_children()[0];
+    let x1w1x2w2 = &n.get_children()[0];
+    let b = &n.get_children()[0];
+    let x1w1 = &x1w1x2w2.get_children()[0];
+    let x2w2 = &x1w1x2w2.get_children()[1];
+    let x1 = &x1w1.get_children()[0];
+    let x2 = &x2w2.get_children()[0];
+    let w1 = &x1w1.get_children()[1];
+    let w2 = &x2w2.get_children()[1];
 
-    fn get_data(&self) -> f32 {
-        self.0.as_ref().borrow().data
-    }
-}
-
-impl Add for Value {
-    type Output = Self;
-
-    fn add(self, rhs: Self) -> Self {
-        Self(Rc::new(RefCell::new(ValueData {
-            data: self.get_data() + rhs.get_data(),
-            grad: 0.0,
-            children: vec![self, rhs],
-            op: Some(Operation::Add),
-        })))
-    }
-}
-
-impl Mul for Value {
-    type Output = Self;
-
-    fn mul(self, rhs: Self) -> Self {
-        Self(Rc::new(RefCell::new(ValueData {
-            data: self.get_data() * rhs.get_data(),
-            grad: 0.0,
-            children: vec![self, rhs],
-            op: Some(Operation::Mul),
-        })))
-    }
+    println!("{:?}", n);
+    println!("{:?}", x1w1x2w2);
+    println!("{:?}", b);
+    println!("{:?}", x1w1);
+    println!("{:?}", x2w2);
+    println!("{:?}", x1);
+    println!("{:?}", x2);
+    println!("{:?}", w1);
+    println!("{:?}", w2);
 }
