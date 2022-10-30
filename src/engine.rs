@@ -45,7 +45,7 @@ impl Value {
         self.0.as_ref().borrow().grad
     }
 
-    fn set_grad(&mut self, grad: f32) {
+    pub fn set_grad(&mut self, grad: f32) {
         self.0.borrow_mut().grad = grad
     }
 
@@ -142,7 +142,7 @@ impl Value {
 impl Add for Value {
     type Output = Self;
 
-    fn add(self, rhs: Self) -> Self {
+    fn add(self, rhs: Self) -> Self::Output {
         Self(Rc::new(RefCell::new(ValueData {
             data: self.get_data() + rhs.get_data(),
             grad: 0.0,
@@ -155,7 +155,7 @@ impl Add for Value {
 impl Add<f32> for Value {
     type Output = Self;
 
-    fn add(self, rhs: f32) -> Self {
+    fn add(self, rhs: f32) -> Self::Output {
         Self(Rc::new(RefCell::new(ValueData {
             data: self.get_data() + rhs,
             grad: 0.0,
@@ -168,7 +168,7 @@ impl Add<f32> for Value {
 impl Add<Value> for f32 {
     type Output = Value;
 
-    fn add(self, rhs: Value) -> Value {
+    fn add(self, rhs: Value) -> Self::Output {
         Value(Rc::new(RefCell::new(ValueData {
             data: rhs.get_data() + self,
             grad: 0.0,
@@ -178,10 +178,18 @@ impl Add<Value> for f32 {
     }
 }
 
+impl Add for &Value {
+    type Output = Value;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        self.to_owned() + rhs.to_owned()
+    }
+}
+
 impl Sub for Value {
     type Output = Self;
 
-    fn sub(self, rhs: Self) -> Self {
+    fn sub(self, rhs: Self) -> Self::Output {
         Self(Rc::new(RefCell::new(ValueData {
             data: self.get_data() - rhs.get_data(),
             grad: 0.0,
@@ -194,7 +202,7 @@ impl Sub for Value {
 impl Sub<f32> for Value {
     type Output = Self;
 
-    fn sub(self, rhs: f32) -> Self {
+    fn sub(self, rhs: f32) -> Self::Output {
         Self(Rc::new(RefCell::new(ValueData {
             data: self.get_data() - rhs,
             grad: 0.0,
@@ -207,7 +215,7 @@ impl Sub<f32> for Value {
 impl Sub<Value> for f32 {
     type Output = Value;
 
-    fn sub(self, rhs: Value) -> Value {
+    fn sub(self, rhs: Value) -> Self::Output {
         Value(Rc::new(RefCell::new(ValueData {
             data: self - rhs.get_data(),
             grad: 0.0,
@@ -217,10 +225,18 @@ impl Sub<Value> for f32 {
     }
 }
 
+impl Sub for &Value {
+    type Output = Value;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        self.to_owned() - rhs.to_owned()
+    }
+}
+
 impl Mul for Value {
     type Output = Self;
 
-    fn mul(self, rhs: Self) -> Self {
+    fn mul(self, rhs: Self) -> Self::Output {
         Self(Rc::new(RefCell::new(ValueData {
             data: self.get_data() * rhs.get_data(),
             grad: 0.0,
@@ -233,7 +249,7 @@ impl Mul for Value {
 impl Mul<f32> for Value {
     type Output = Self;
 
-    fn mul(self, rhs: f32) -> Self {
+    fn mul(self, rhs: f32) -> Self::Output {
         Self(Rc::new(RefCell::new(ValueData {
             data: self.get_data() * rhs,
             grad: 0.0,
@@ -246,7 +262,7 @@ impl Mul<f32> for Value {
 impl Mul<Value> for f32 {
     type Output = Value;
 
-    fn mul(self, rhs: Value) -> Value {
+    fn mul(self, rhs: Value) -> Self::Output {
         Value(Rc::new(RefCell::new(ValueData {
             data: rhs.get_data() * self,
             grad: 0.0,
@@ -256,10 +272,18 @@ impl Mul<Value> for f32 {
     }
 }
 
+impl Mul for &Value {
+    type Output = Value;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        self.to_owned() * rhs.to_owned()
+    }
+}
+
 impl Div for Value {
     type Output = Self;
 
-    fn div(self, rhs: Self) -> Self {
+    fn div(self, rhs: Self) -> Self::Output {
         Self(Rc::new(RefCell::new(ValueData {
             data: self.get_data() / rhs.get_data(),
             grad: 0.0,
@@ -272,7 +296,7 @@ impl Div for Value {
 impl Div<f32> for Value {
     type Output = Self;
 
-    fn div(self, rhs: f32) -> Self {
+    fn div(self, rhs: f32) -> Self::Output {
         Self(Rc::new(RefCell::new(ValueData {
             data: self.get_data() / rhs,
             grad: 0.0,
@@ -285,13 +309,21 @@ impl Div<f32> for Value {
 impl Div<Value> for f32 {
     type Output = Value;
 
-    fn div(self, rhs: Value) -> Value {
+    fn div(self, rhs: Value) -> Self::Output {
         Value(Rc::new(RefCell::new(ValueData {
             data: rhs.get_data() / self,
             grad: 0.0,
             children: vec![rhs, Value::new(self)],
             op: Some(Operation::Add),
         })))
+    }
+}
+
+impl Div for &Value {
+    type Output = Value;
+
+    fn div(self, rhs: Self) -> Self::Output {
+        self.to_owned() / rhs.to_owned()
     }
 }
 
