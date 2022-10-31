@@ -37,10 +37,6 @@ impl Value {
         self.0.as_ref().borrow().data
     }
 
-    fn set_data(&mut self, data: f32) {
-        self.0.borrow_mut().data = data
-    }
-
     fn get_grad(&self) -> f32 {
         self.0.as_ref().borrow().grad
     }
@@ -336,45 +332,5 @@ impl Display for Value {
 impl Debug for Value {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         Display::fmt(&self, f)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-
-    use super::*;
-
-    #[test]
-    fn add_two_values() {
-        assert_eq!((Value::new(2.0) + Value::new(3.0)).get_data(), 5.0);
-        assert_eq!((Value::new(2.0) + 3.0).get_data(), 5.0);
-        assert_eq!((3.0 + Value::new(2.0)).get_data(), 5.0);
-    }
-
-    #[test]
-    fn sub_two_values() {
-        assert_eq!((Value::new(2.0) - Value::new(3.0)).get_data(), -1.0);
-        assert_eq!((Value::new(2.0) - 3.0).get_data(), -1.0);
-        assert_eq!((3.0 - Value::new(2.0)).get_data(), 1.0);
-    }
-
-    #[test]
-    fn mul_two_values() {
-        let a = Value::new(2.0);
-        let b = Value::new(3.0);
-
-        assert_eq!((a * b).get_data(), 6.0)
-    }
-
-    #[test]
-    fn compute_tanh() {
-        let a = Value::new(1.0);
-        assert_eq!(a.tanh().get_data(), a.get_data().tanh())
-    }
-
-    #[test]
-    fn compute_exp() {
-        let a = Value::new(2.0);
-        assert_eq!(a.exp().get_data(), a.get_data().exp())
     }
 }
